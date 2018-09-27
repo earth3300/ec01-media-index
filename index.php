@@ -3,8 +3,8 @@
 /**
  * EC01 Media Index.
  *
- * Allows media (images, video and audio) to be viewed in a directory through an
- * index file.
+ * Allows media (images, audio and video) to be viewed in a directory through a
+ * single index file.
  *
  * @package EC01 Media Index
  * @since 1.0.0
@@ -12,16 +12,15 @@
  * @copyright Copyright (c) 2018, Clarence Bos
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0+
  * @link http://wp.cbos.ca/plugins/ec01-media-index
- * @see https://carlalexander.ca/designing-class-generate-wordpress-html-content/
  *
  * @wordpress-plugin
  * Plugin Name: EC01 Media Index
  * Plugin URI:  http://wp.cbos.ca/plugins/ec01-media-index/
- * Description: Allows media (image, video, audio) to be viewed in a directory through a single file. Shortcode [media-list].
+ * Description: Allows media (image, audio and video) to be viewed in a directory through a single file. Shortcode [media-index].
  * Version: 1.0.0
  * Author: Clarence Bos
  * Author URI: http://ec01.earth3300.info/
- * Text Domain: ec01-media-list
+ * Text Domain: ec01-media-index
  * License:  GPL-3.0+
  * License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
  */
@@ -33,7 +32,7 @@
  * and the switch for determining the context in which this file
  * is found.
  */
-class MediaList
+class MediaIndex
 {
 
 	/** @var array Default options. */
@@ -47,10 +46,11 @@ class MediaList
 			'mp4' => [ 'type' => 'video' ],
 			'mp3' => [ 'type' => 'audio' ],
 			],
+		'supertype' => 'media',
 	];
 
 	/**
-	 * Get the list of images as HTML.
+	 * Gets the list of images as HTML.
 	 *
 	 * In order to process the media file correctly, the browser has to know what
 	 * MIME (Multipurpose Internet Mail Extension) it is. The MIME type has the
@@ -68,19 +68,27 @@ class MediaList
 	 *
 	 * @return string
 	 */
-	public function get( $args )
+	public function get( $args = null )
 	{
-		if ( $this->checkArgs( $args ) )
+		/** If no arguments are set, assume current directory */
+		if ( $args = $this->setDirectorySwitch( $args ) )
 		{
 			$max = $this->getMaxImages( $args );
-			$args['self'] = $this->isDirSelf( $args );
 			$subtypes = $this->opts['subtypes'];
+
+			/** Add the "supertype" to the class string (i.e. media). */
+			$args['class'] = $this->opts['supertype'];
 
 			$str = '<article>' . PHP_EOL;
 			foreach ( $subtypes as $subtype => $type ) {
 				$args['type'] = $type['type'];
 				$args['subtype'] = $subtype;
 
+				/** If the class is not already present, add it. */
+				if( strpos( $args['class'], $args['type'] ) === FALSE )
+				   {
+					$args['class'] .= ' ' . $args['type'];
+				   }
 				if ( $match = $this->getMatchPattern( $subtype, $args ) )
 				{
 					$str .= $this->iterateFiles( $match, $max, $args );
@@ -175,26 +183,6 @@ class MediaList
 			return $_SERVER['DOCUMENT_ROOT'];
 		}
 	}
-
-	/**
-	 * Get the "Self" directory, if set.
-	 *
-	 * @param array $args
-	 *
-	 * @return bool
-	 */
-	private function isDirSelf( $args )
-	{
-		if ( isset( $args['self'] ) && true == $args['self'] )
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
 
 	/**
 	 * Get the maximum number of images to process.
@@ -318,9 +306,7 @@ class MediaList
 			default:
 				$str = $this-> getImageHtml( $args);
 				break;
-
 		}
-
 		return $str;
 	}
 
@@ -335,19 +321,31 @@ class MediaList
 	 */
 	private function getImageHtml( $args )
 	{
+		$dim['width'] = $this->getImageWidth( $args );
+		$dim['height'] = $this->getImageHeight( $args );
 		$str = '<div class="media image">' . PHP_EOL;
 		$str .= sprintf( '<a href="%s">%s', $args['src'], PHP_EOL );
 		$str .= '<img';
 		$str .= sprintf( ' class="%s"', $this->getImageClass( $args ) );
 		$str .= sprintf( ' src="%s"', $args['src'] );
 		$str .= sprintf( ' alt="%s"', $this->getImageAlt( $args ) );
-		$str .= sprintf( ' width="%s"', $this->getImageWidth( $args ) );
-		$str .= sprintf( ' height="%s"', $this->getImageHeight( $args ) );
+		$str .= sprintf( ' width="%s"', $dim['width'] );
+		$str .= sprintf( ' height="%s"', $dim['height'] );
 		$str .= ' />' . PHP_EOL;
 		$str .= '</a>' . PHP_EOL;
 		$str .= '<p class="text-center">';
-		$str .= sprintf( '<span class="name">%s</span>', $this->getMediaName( $args['name'] ) );
-		$str .= sprintf( ' <span class="size">%s</span>', $this->getMediaSize( $args ) );
+		if ( $name = $this->getMediaName( $args['name'] ) )
+		{
+			$str .= sprintf( '<span class="name">%s</span>', $name );
+		}
+		if ( ! empty ( $dim['width'] && ! empty( $dim['height'] ) ) )
+		{
+			$str .= sprintf( ' <span class="dimensions">%sX%s</span>', $dim['width'], $dim['height'] );
+		}
+		if ( $size = $this->getMediaSize( $args ) )
+		{
+			$str .= sprintf( ' <span class="size">%s</span>', $size );
+		}
 		$str .= '</p>' . PHP_EOL;
 		$str .= '</div>' . PHP_EOL;
 
@@ -420,7 +418,7 @@ class MediaList
 		$str .= '<head>' . PHP_EOL;
 		$str .= '<meta charset="UTF-8">' . PHP_EOL;
 		$str .= '<meta name="viewport" content="width=device-width, initial-scale=1"/>' . PHP_EOL;
-		$str .= '<title>Media List</title>' . PHP_EOL;
+		$str .= '<title>Media Index</title>' . PHP_EOL;
 		$str .= '<meta name="robots" content="noindex,nofollow" />' . PHP_EOL;
 		$str .= '<link rel=stylesheet href="/0/theme/css/style.css">' . PHP_EOL;
 		$str .= '</head>' . PHP_EOL;
@@ -430,7 +428,7 @@ class MediaList
 		$str .= '</main>' . PHP_EOL;
 		$str .= '<footer>' . PHP_EOL;
 		$str .= '<div class="text-center"><small>';
-		$str .= 'Note: This page has been <a href="https://gist.github.com/earth3300/3f9ed7ae03ee715d4b1bfe1b12a16075">automatically generated</a>. No header, footer, menus or sidebars are available.';
+		$str .= 'Note: This page has been <a href="https://github.com/earth3300/ec01-media-index.git">automatically generated</a>. No header, footer, menus or sidebars are available.';
 		$str .= '</small></div>' . PHP_EOL;
 		$str .= '</footer>' . PHP_EOL;
 		$str .= '</html>' . PHP_EOL;
@@ -443,9 +441,12 @@ class MediaList
 	 *
 	 * Return the direct string values of each. Do no extra processing here.
 	 *
-	 * $regex = '\/([a-z\-]{3,60})-([0-9]{2,4}x[0-9]{2,4})'
+	 * $regex = '/\/([a-z0-9\-]{3,150})-([0-9]{2,4}x[0-9]{2,5})\./'
 	 *
-	 * Although this looks complicated, it has potential to be helpful.
+	 * Part 1: Looks for letters, numbers and dashes from 3 to 150 characters.
+	 * Part 2: Followed by a dash, then dimesions from 2 to 4 x 2 to 5 characters.
+	 * Part 3: Ending. Followed by a dot \. (which will come before the extension).
+	 *
 	 * Not only does it divide the string given it into two parts, but it
 	 * also does a basic quality check on the image name structure. If the image
 	 * name does not meet the criteria given, it won't be captured.
@@ -466,7 +467,7 @@ class MediaList
 		if ( strlen( $str ) > 12 )
 		{
 			/** If this isn't matched, check for a name only */
-			$regex = '/\/([a-z\-]{3,150})-([0-9]{2,4}x[0-9]{2,4})/';
+			$regex = '/\/([a-z0-9\-]{3,150})-([0-9]{2,4}x[0-9]{2,5})\./';
 			preg_match( $regex, $str, $match );
 
 			if ( empty( $match ) )
@@ -482,7 +483,6 @@ class MediaList
 			else
 			{
 				$arr['name'] = null;
-
 			}
 
 			if ( ! empty( $match[2] ) )
@@ -492,49 +492,11 @@ class MediaList
 			else
 			{
 				$arr['strDim'] = null;
-
 			}
-
-
 			return $arr;
 		}
 		else {
 			return false;
-		}
-	}
-
-	/**
-	 * Get the image name.
-	 *
-	 * Gets the image name as the first part of the file name, before the
-	 * image size, if present. Converts hyphens into spaces and puts all
-	 * characters into uppercase, for simplicity. May be the same as the alt tag.
-	 *
-	 * The name:
-	 *
-	 * Starts with `/`
-	 * Ends with `-`
-	 *
-	 * $regex = '/\/([a-z\-]{3,36})-/';
-	 *
-	 * @param array $args
-	 * @return string
-	 */
-	private function getImageNameStr( $str )
-	{
-		if ( strlen( $str ) > 3 )
-		{
-			$regex = '/\/([a-z\-]{3,36})--/';
-			preg_match( $regex, $str, $match );
-			if ( ! empty( $match[1] ) )
-			{
-				return $match[1];
-			}
-			else
-			{
-				// Not available.
-				return $this->opts['msg']['na'];
-			}
 		}
 	}
 
@@ -609,21 +571,20 @@ class MediaList
 	 * Get the image size
 	 *
 	 * @param array $args
-	 * @return int
+	 *
+	 * @return string|null
 	 */
 	private function getMediaSize( $args ){
 
-		if ( class_exists('Imagick') )
-		{
-			$image = new Imagick( $args['file'] );
-			$size = $image->getImageLength();
-		}
-		else
+		if ( isset( $args['file'] ) )
 		{
 			$size = filesize( $args['file'] );
+			$size = number_format( $size / 1000, 1, ".", "," );
+			return $size . ' kB';
 		}
-		$size = number_format( $size / 1000, 1, ".", "," );
-		return $size . ' kB';
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -689,43 +650,56 @@ class MediaList
 	}
 
 	/**
-	 * Check the arguments from the shortcode
+	 * Set the Directory Switch (Process Containing or Given Directory).
+	 *
+	 * If $args['self'] or $args['dir'] are not set, it assumes we are in the
+	 * directory for which images are to be processed. Therefore $args['self']
+	 * is set to true and $args['dir'] is set to null. We also have to set the
+	 * $args['doctype'] to true to know whether or not to wrap the output in
+	 * the correct doctype and the containing html and body elements.
 	 *
 	 * @param array $args
-	 * @return bool
+	 *
+	 * @return array
 	 */
-	private function checkArgs( $args )
+	private function setDirectorySwitch( $args )
 	{
-		if ( isset( $args['dir'] ) || isset( $args['self'] ) )
+		/** If $args['dir'] is not set, set it to false. */
+		$args['dir'] = isset( $args['dir'] ) ? $args['dir'] : false;
+
+		/** if $args['dir'] == false, set $args['self'] to true. */
+		if ( ! $args['dir'] )
 		{
-			return true;
+			$args['self'] = true;
+			$args['doctype'] = true;
+			return $args;
 		}
 		else
 		{
-			return false;
+			return $args;
 		}
 	}
 }
 
 /**
- * Callback from the media-list shortcode.
+ * Callback from the media-index shortcode.
  *
- * Performs a check, then instantiates the MediaList class
+ * Performs a check, then instantiates the MediaIndex class
  * and returns the media list as HTML.
  *
  * @param array  $args['dir']
  * @return string  HTML as a list of images, wrapped in the article element.
  */
-function media_list( $args )
+function media_index( $args )
 {
 	if ( is_array( $args ) )
 	{
-		$media_list = new MediaList();
-		return $media_list -> get( $args );
+		$media_index = new MediaIndex();
+		return $media_index -> get( $args );
 	}
 	else
 	{
-		return '<!-- Missing the image directory to process. [media-list dir=""]-->';
+		return '<!-- Missing the image directory to process. [media-index dir=""]-->';
 	}
 }
 
@@ -735,7 +709,7 @@ function media_list( $args )
  * The following checks to see whether or not this file (index.php) is being loaded
  * as part of the WordPress package, or not. If it is, we expect a WordPress
  * function to be available (in this case, `add_shortcode`). We then ensure there
- * is no direct access and add the shortcode hook, `media-list`. If we are not in
+ * is no direct access and add the shortcode hook, `media-index`. If we are not in
  * WordPress, then this file acts as an "indexing" type of file by listing all
  * of the allowed media types (currently jpg, png, mp3 and mp4) and making them
  * viewable to the end user by wrapping them in HTML and making use of a css
@@ -750,18 +724,16 @@ if( function_exists( 'add_shortcode' ) )
 	// No direct access.
 	defined('ABSPATH') || exit('No direct access.');
 
-	//shortcode [media-list dir=""]
-	add_shortcode( 'media-list', 'media_list' );
+	//shortcode [media-index dir=""]
+	add_shortcode( 'media-index', 'media_index' );
 }
 else
 {
 	/**
 	 * Outside of WordPress. Instantiate directly, assuming current directory.
 	 *
-	 * @param $args['self'] = true  List the files in the current directory.
-	 *
-	 * @param array $args['doctype'] = true  Set the doctype to html.
+	 * @return string
 	 */
-	$media_list = new MediaList();
-	echo $media_list -> get( array( 'self' => true, 'doctype' => true ) );
+	$media_index = new MediaIndex();
+	echo $media_index -> get();
 }
