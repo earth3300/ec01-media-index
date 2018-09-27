@@ -58,6 +58,6 @@ Oh yes, this file can also function as a WordPress plugin. No changes need to be
 
 This solution was discovered as a part of an effort to build a model, a design for an integrated community. Even though this solution is very, very simple, the simplicity was discovered as a result of wading through much complexity. It came at the tail end of 20 months of development work. Due to the nature in which this solution was found and due to the focus and intent of these development efforts, a payment is requested upon decision to use, using a Try and Buy model, on the honour system.
 
-**Payment can be made here: http://ec01.earth3300.local/how/stor/progr/softwa/php/ once a decision to use it has been made, on a per user basis.**
+**Payment can be made here: http://ec01.earth3300.info/how/stor/progr/softwa/php/ once a decision to use it has been made, on a per user basis.**
 
 The long term goal is to create a sustainable community that can live indefinitely on the land that supports it. This community may be from 150 to 500 people in size, but is initially planned for 144 (6 properties of 4 people each times six clusters), on a property of a quarter section (2,640' x 2,640'). Your purchase of this product helps to support this endeavour. Thank you for your support.
