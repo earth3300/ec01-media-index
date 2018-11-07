@@ -1,5 +1,4 @@
 <?php
-
 /**
  * EC01 Media Index.
  *
@@ -8,21 +7,26 @@
  *
  * @package EC01 Media Index
  * @since 1.0.0
- * @author Clarence Bos <cbos@tnoep.ca>
+ * @author Clarence J. Bos <cbos@tnoep.ca>
  * @copyright Copyright (c) 2018, Clarence Bos
- * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0+
- * @link http://wp.cbos.ca/plugins/ec01-media-index
+ * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL v3.0
+ * @link https://github.com/earth3300/ec01-media-index
  *
  * @wordpress-plugin
  * Plugin Name: EC01 Media Index
- * Plugin URI:  http://wp.cbos.ca/plugins/ec01-media-index/
+ * Plugin URI:  https://github.com/earth3300/ec01-media-index
  * Description: Allows media (image, audio and video) to be viewed in a directory through a single file. Shortcode [media-index].
  * Version: 1.0.0
- * Author: Clarence Bos
- * Author URI: http://ec01.earth3300.info/
+ * Author: Clarence J. Bos
+ * Author URI: https://github.com/earth3300/
  * Text Domain: ec01-media-index
- * License:  GPL-3.0+
+ * License:  GPL v3.0
  * License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * File: index.php
+ * Created: 2018-10-01
+ * Updated: 2018-11-07
+ * Time: 14:27 EST
  */
 
 /**
@@ -47,6 +51,7 @@ class MediaIndex
 			'mp3' => [ 'type' => 'audio' ],
 			],
 		'supertype' => 'media',
+		'url' => 'https://github.com/earth3300/ec01-media-index',
 	];
 
 	/**
@@ -146,6 +151,7 @@ class MediaIndex
 	 * Get the source from the file, checking for a preceding slash.
 	 *
 	 * @param string $str
+	 *
 	 * @return string
 	 */
 	private function getSrcFromFile( $str )
@@ -188,6 +194,7 @@ class MediaIndex
 	 * Get the maximum number of images to process.
 	 *
 	 * @param array $args
+	 *
 	 * @return int
 	 */
 	private function getMaxImages( $args )
@@ -237,6 +244,7 @@ class MediaIndex
 	 * This does not need to include the `/media` directory.
 	 *
 	 * @param array $args
+	 *
 	 * @return string
 	 */
 	private function getBasePath( $args )
@@ -367,8 +375,9 @@ class MediaIndex
 	private function getAudioHtml( $args )
 	{
 		$str = '<div class="media audio">' . PHP_EOL;
-		$str .= '<audio controls' . PHP_EOL;
+		$str .= '<audio controls>' . PHP_EOL;
 		$str .= sprintf( '<source src="%s" type="audio/mp3">%s', $args['src'], PHP_EOL );
+		$str .= sprintf( '<a href="%s">%s</a>', $args['src'], $this->getMediaName( $args['name'] ) );
 		$str .= '</audio>' . PHP_EOL;
 		$str .= '<p class="text-center">';
 		$str .= sprintf( '<span class="name">%s</span>', $this->getMediaName( $args['name'] ) );
@@ -409,6 +418,7 @@ class MediaIndex
 	 * Wrap the string in page HTML `<!DOCTYPE html>`, etc.
 	 *
 	 * @param string $str
+	 *
 	 * @return string
 	 */
 	public function getPageHtml( $html, $args )
@@ -428,7 +438,7 @@ class MediaIndex
 		$str .= '</main>' . PHP_EOL;
 		$str .= '<footer>' . PHP_EOL;
 		$str .= '<div class="text-center"><small>';
-		$str .= 'Note: This page has been <a href="https://github.com/earth3300/ec01-media-index.git">automatically generated</a>. No header, footer, menus or sidebars are available.';
+		$str .= sprintf( 'Note: This page has been <a href="%s">automatically generated</a>. No header, footer, menus or sidebars are available.', $this->opts['url'] );
 		$str .= '</small></div>' . PHP_EOL;
 		$str .= '</footer>' . PHP_EOL;
 		$str .= '</html>' . PHP_EOL;
@@ -533,6 +543,7 @@ class MediaIndex
 	 * Get the image width.
 	 *
 	 * @param array $args
+	 *
 	 * @return string
 	 */
 	private function getImageWidth( $args )
@@ -579,8 +590,18 @@ class MediaIndex
 		if ( isset( $args['file'] ) )
 		{
 			$size = filesize( $args['file'] );
-			$size = number_format( $size / 1000, 1, ".", "," );
-			return $size . ' kB';
+
+			/** Format size in MB files 1 MB (1,000,000 kB) or over. */
+			if ( $size >= 1000000 )
+			{
+				$size = number_format( $size / 1000000, 3, ".", "," );
+				return $size . ' MB';
+			}
+			else
+				$size = number_format( $size / 1000, 1, ".", "," );
+				{
+				return $size . ' kB';
+			}
 		}
 		else {
 			return null;
@@ -593,6 +614,7 @@ class MediaIndex
 	 * May be the same as the name (or not).
 	 *
 	 * @param array $args
+	 *
 	 * @return string
 	 */
 	private function getImageAlt( $args )
@@ -613,6 +635,7 @@ class MediaIndex
 	 * Get the Media Name
 	 *
 	 * @param array $args
+	 *
 	 * @return string
 	 */
 	private function getMediaName( $str )
@@ -634,6 +657,7 @@ class MediaIndex
 	 * Get the image class.
 	 *
 	 * @param array $args
+	 *
 	 * @return string
 	 */
 	private function getImageClass( $args )
@@ -688,6 +712,7 @@ class MediaIndex
  * and returns the media list as HTML.
  *
  * @param array  $args['dir']
+ *
  * @return string  HTML as a list of images, wrapped in the article element.
  */
 function media_index( $args )
@@ -695,7 +720,7 @@ function media_index( $args )
 	if ( is_array( $args ) )
 	{
 		$media_index = new MediaIndex();
-		return $media_index -> get( $args );
+		return $media_index->get( $args );
 	}
 	else
 	{
@@ -721,10 +746,10 @@ function media_index( $args )
  */
 if( function_exists( 'add_shortcode' ) )
 {
-	// No direct access.
-	defined('ABSPATH') || exit('No direct access.');
+	/** No direct access (NDA). */
+	defined('ABSPATH') || exit('NDA.');
 
-	//shortcode [media-index dir=""]
+	/** shortcode [media-index dir=""] */
 	add_shortcode( 'media-index', 'media_index' );
 }
 else
@@ -735,5 +760,5 @@ else
 	 * @return string
 	 */
 	$media_index = new MediaIndex();
-	echo $media_index -> get();
+	echo $media_index->get();
 }
