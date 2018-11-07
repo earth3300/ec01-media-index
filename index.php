@@ -6,7 +6,7 @@
  * single index file.
  *
  * @package EC01 Media Index
- * @since 1.0.0
+ * @version 1.0.1
  * @author Clarence J. Bos <cbos@tnoep.ca>
  * @copyright Copyright (c) 2018, Clarence Bos
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL v3.0
@@ -16,12 +16,16 @@
  * Plugin Name: EC01 Media Index
  * Plugin URI:  https://github.com/earth3300/ec01-media-index
  * Description: Allows media (image, audio and video) to be viewed in a directory through a single file. Shortcode [media-index].
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Clarence J. Bos
  * Author URI: https://github.com/earth3300/
  * Text Domain: ec01-media-index
  * License:  GPL v3.0
  * License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * Standards: https://semver.org/  Versioning
+ * Standards: https://www.php-fig.org/psr/  PHP Formatting
+ * Standards: http://docs.phpdoc.org/references/phpdoc/tags/ Documentation.
  *
  * File: index.php
  * Created: 2018-10-01
