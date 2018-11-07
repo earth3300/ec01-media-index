@@ -1,6 +1,6 @@
 <?php
 /**
- * EC01 Media Index.
+ * EC01 Media Index
  *
  * Allows media (images, audio and video) to be viewed in a directory through a
  * single index file.
