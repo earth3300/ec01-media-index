@@ -8,7 +8,7 @@
  * @package EC01 Media Index
  * @version 1.0.1
  * @author Clarence J. Bos <cbos@tnoep.ca>
- * @copyright Copyright (c) 2018, Clarence Bos
+ * @copyright Copyright (c) 2018, Clarence J. Bos
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL v3.0
  * @link https://github.com/earth3300/ec01-media-index
  *
