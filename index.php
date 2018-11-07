@@ -428,7 +428,7 @@ class MediaIndex
 	public function getPageHtml( $html, $args )
 	{
 		$str = '<!DOCTYPE html>' . PHP_EOL;
-		$str .= sprintf( '<html class="dynamic %s" lang="en-CA">', $args['type'], PHP_EOL );
+		$str .= sprintf( '<html class="dynamic %s" lang="en-CA">%s', $args['type'], PHP_EOL );
 		$str .= '<head>' . PHP_EOL;
 		$str .= '<meta charset="UTF-8">' . PHP_EOL;
 		$str .= '<meta name="viewport" content="width=device-width, initial-scale=1"/>' . PHP_EOL;
