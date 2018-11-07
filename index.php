@@ -5,7 +5,7 @@
  * Allows media (images, audio and video) to be viewed in a directory through a
  * single index file.
  *
- * @package EC01 Media Index
+ * @package Earth3300\EC01
  * @version 1.0.1
  * @author Clarence J. Bos <cbos@tnoep.ca>
  * @copyright Copyright (c) 2018, Clarence J. Bos
@@ -32,6 +32,8 @@
  * Updated: 2018-11-07
  * Time: 14:27 EST
  */
+
+namespace Earth3300\EC01;
 
 /**
  * Allows media (jpg, png, mp3, mp4) to be viewed in the given directory.
